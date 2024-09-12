@@ -26,6 +26,7 @@ func NewRouter(log *logrus.Logger, ps services.ProductsServiceInterface) *gin.En
 	// products routes
 	{
 		products := api.Group("/products")
+		products.Use(middlewares.JWTAuthMiddleware())
 		products.GET("", controllers.GetAllProducts(ps))
 		products.GET("/:id", controllers.GetProductById(ps))
 		products.POST("", controllers.AddProduct(ps))
