@@ -7,6 +7,7 @@ import (
 	"simpler-products/models"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -16,11 +17,11 @@ var (
 
 type ProductsServiceInterface interface {
 	GetAllProducts() ([]models.Product, error)
-	GetProductById(id int) (*models.Product, error)
+	GetProductById(id string) (*models.Product, error)
 	AddProduct(product *models.Product) error
-	UpdateProduct(id int, product *models.Product) (*models.Product, error)
-	PatchProduct(id int, product *models.Product) (*models.Product, error)
-	DeleteProduct(id int) error
+	UpdateProduct(id string, product *models.Product) (*models.Product, error)
+	PatchProduct(id string, product *models.Product) (*models.Product, error)
+	DeleteProduct(id string) error
 }
 
 type ProductsService struct {
@@ -51,8 +52,8 @@ func (ps *ProductsService) GetAllProducts() ([]models.Product, error) {
 	return products, nil
 }
 
-func (ps *ProductsService) GetProductById(id int) (*models.Product, error) {
-	ps.Log.Debugf("Fetching product with ID: %d from database", id)
+func (ps *ProductsService) GetProductById(id string) (*models.Product, error) {
+	ps.Log.Debugf("Fetching product with ID: %v from database", id)
 
 	var product models.Product
 	err := ps.DB.QueryRow("SELECT * FROM Products WHERE id = ?", id).Scan(&product.ID, &product.Name, &product.Description, &product.Price)
@@ -70,20 +71,20 @@ func (ps *ProductsService) GetProductById(id int) (*models.Product, error) {
 func (ps *ProductsService) AddProduct(product *models.Product) error {
 	ps.Log.Debugf("Creating new product in database, data: %+v", product)
 
-	result, err := ps.DB.Exec("INSERT INTO Products (name, description, price) VALUES (?, ?, ?)", product.Name, product.Description, product.Price)
+	uuid := uuid.NewString()
+	_, err := ps.DB.Exec("INSERT INTO Products (id, name, description, price) VALUES (?, ?, ?, ?)", uuid, product.Name, product.Description, product.Price)
 	if err != nil {
 		ps.Log.Errorf("Error creating new product: %v", err)
 		return err
 	}
 
-	lastInsertID, _ := result.LastInsertId()
-	product.ID = int(lastInsertID)
+	product.ID = uuid
 
 	return nil
 }
 
-func (ps *ProductsService) UpdateProduct(id int, product *models.Product) (*models.Product, error) {
-	ps.Log.Debugf("Updating product with ID: %d in database, data: %+v", id, product)
+func (ps *ProductsService) UpdateProduct(id string, product *models.Product) (*models.Product, error) {
+	ps.Log.Debugf("Updating product with ID: %v in database, data: %+v", id, product)
 
 	_, err := ps.DB.Exec("UPDATE Products SET name = ?, description = ?, price = ? WHERE id = ?", product.Name, product.Description, product.Price, id)
 	if err != nil {
@@ -104,8 +105,8 @@ func (ps *ProductsService) UpdateProduct(id int, product *models.Product) (*mode
 	return updatedProduct, nil
 }
 
-func (ps *ProductsService) PatchProduct(id int, product *models.Product) (*models.Product, error) {
-	ps.Log.Debugf("Patching product with ID: %d in database, data: %+v", id, product)
+func (ps *ProductsService) PatchProduct(id string, product *models.Product) (*models.Product, error) {
+	ps.Log.Debugf("Patching product with ID: %v in database, data: %+v", id, product)
 
 	// Build the SQL query dynamically based on the provided fields
 	var updates []string
@@ -150,10 +151,20 @@ func (ps *ProductsService) PatchProduct(id int, product *models.Product) (*model
 	return updatedProduct, nil
 }
 
-func (ps *ProductsService) DeleteProduct(id int) error {
-	ps.Log.Debugf("Deleting product with ID: %d from database", id)
+func (ps *ProductsService) DeleteProduct(id string) error {
+	ps.Log.Debugf("Deleting product with ID: %v from database", id)
 
-	_, err := ps.DB.Exec("DELETE FROM Products WHERE id = ?", id)
+	// Fetch the product to be deleted from the database
+	_, err := ps.GetProductById(id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return ErrProductNotFound
+		}
+		ps.Log.Errorf("Error deleting product: %v", err)
+		return err
+	}
+
+	_, err = ps.DB.Exec("DELETE FROM Products WHERE id = ?", id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return ErrProductNotFound
