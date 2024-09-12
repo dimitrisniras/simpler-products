@@ -14,6 +14,7 @@ func Init(user, password, host, port, dbName string) (*sql.DB, error) {
 		return nil, err
 	}
 
+	// check if Database connection is established
 	err = db.Ping()
 
 	if err != nil {
