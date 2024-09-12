@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"simpler-products/models"
 	"simpler-products/services"
-	"simpler-products/validators"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,42 +14,44 @@ func GetAllProducts(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		products, err := ps.GetAllProducts()
 		if err != nil {
-			c.Error(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-
 		c.JSON(http.StatusOK, products)
 	}
 }
 
 func GetProductById(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := validators.ValidateProductID(c)
+		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
 			return
 		}
 
 		product, err := ps.GetProductById(id)
 		if err != nil {
-			c.Error(err)
+			if errors.Is(err, services.ErrProductNotFound) {
+				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			} else {
+				c.Error(err)
+			}
 			return
 		}
-
 		c.JSON(http.StatusOK, product)
 	}
 }
 
 func AddProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		product, err := validators.ValidateProduct(c)
-		if err != nil {
-			c.Error(err)
+		var product models.Product
+		if err := c.ShouldBindJSON(&product); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		if err := ps.AddProduct(product); err != nil {
-			c.Error(err)
+		if err := ps.AddProduct(&product); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -59,19 +61,20 @@ func AddProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 func UpdateProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := validators.ValidateProductID(c)
+		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+			return
+		}
+
+		var product models.Product
+
+		if err := c.ShouldBindJSON(&product); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		product, err := validators.ValidateProduct(c)
-		if err != nil {
-			c.Error(err)
-			return
-		}
-
-		updatedProduct, err := ps.UpdateProduct(id, product)
+		updatedProduct, err := ps.UpdateProduct(id, &product)
 		if err != nil {
 			if errors.Is(err, services.ErrProductNotFound) {
 				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -87,15 +90,17 @@ func UpdateProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 func PatchProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := validators.ValidateProductID(c)
+		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
 			return
 		}
 
 		var product models.Product
 
 		if err := c.ShouldBindJSON(&product); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
 			return
 		}
 
@@ -115,9 +120,9 @@ func PatchProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 func DeleteProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := validators.ValidateProductID(c)
+		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
 			return
 		}
 
