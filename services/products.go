@@ -3,9 +3,7 @@ package services
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"simpler-products/models"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
@@ -20,7 +18,6 @@ type ProductsServiceInterface interface {
 	GetProductById(id string) (*models.Product, error)
 	AddProduct(product *models.Product) error
 	UpdateProduct(id string, product *models.Product) (*models.Product, error)
-	PatchProduct(id string, product *models.Product) (*models.Product, error)
 	DeleteProduct(id string) error
 }
 
@@ -96,52 +93,6 @@ func (ps *ProductsService) UpdateProduct(id string, product *models.Product) (*m
 	ps.Log.Debugf("Updating product with ID: %v in database, data: %+v", id, product)
 
 	_, err := ps.DB.Exec("UPDATE Products SET name = ?, description = ?, price = ? WHERE id = ?", product.Name, product.Description, product.Price, id)
-	if err != nil {
-		ps.Log.Errorf("Error updating product: %v", err)
-		return nil, err
-	}
-
-	// Fetch the updated product from the database
-	updatedProduct, err := ps.GetProductById(id)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, ErrProductNotFound
-		}
-		ps.Log.Errorf("Error updating product: %v", err)
-		return nil, err
-	}
-
-	return updatedProduct, nil
-}
-
-func (ps *ProductsService) PatchProduct(id string, product *models.Product) (*models.Product, error) {
-	ps.Log.Debugf("Patching product with ID: %v in database, data: %+v", id, product)
-
-	// Build the SQL query dynamically based on the provided fields
-	var updates []string
-	var args []interface{}
-
-	if product.Name != "" {
-		updates = append(updates, "name = ?")
-		args = append(args, product.Name)
-	}
-	if product.Description != "" {
-		updates = append(updates, "description = ?")
-		args = append(args, product.Description)
-	}
-	if product.Price != 0 { // Assuming 0 is not a valid price
-		updates = append(updates, "price = ?")
-		args = append(args, product.Price)
-	}
-
-	if len(updates) == 0 {
-		return nil, errors.New("no fields to update")
-	}
-
-	updateQuery := fmt.Sprintf("UPDATE Products SET %s WHERE id = ?", strings.Join(updates, ", "))
-	args = append(args, id)
-
-	_, err := ps.DB.Exec(updateQuery, args...)
 	if err != nil {
 		ps.Log.Errorf("Error updating product: %v", err)
 		return nil, err

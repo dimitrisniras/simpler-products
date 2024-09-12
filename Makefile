@@ -4,6 +4,7 @@ install-deps:
 	go get github.com/go-sql-driver/mysql
 	go get github.com/sirupsen/logrus
 	go get github.com/google/uuid
+	go get github.com/go-playground/validator/v10
 
 build:
 	go build -o bin/main main.go
