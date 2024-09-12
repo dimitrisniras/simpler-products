@@ -51,7 +51,9 @@ func Init() (*Config, error) {
 	}
 
 	// Create services
-	productsService := &services.ProductsService{}
+	productsService := &services.ProductsService{
+		DB: db,
+	}
 
 	return &Config{
 		Port:            port,
