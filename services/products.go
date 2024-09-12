@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"simpler-products/models"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 type ProductsServiceInterface interface {
@@ -18,12 +20,16 @@ type ProductsServiceInterface interface {
 }
 
 type ProductsService struct {
-	DB *sql.DB
+	DB  *sql.DB
+	Log *logrus.Logger
 }
 
 func (ps *ProductsService) GetAllProducts() ([]models.Product, error) {
+	ps.Log.Debug("Fetching all products from database")
+
 	rows, err := ps.DB.Query("SELECT * FROM Products")
 	if err != nil {
+		ps.Log.Errorf("Error fetching products: %v", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -32,6 +38,7 @@ func (ps *ProductsService) GetAllProducts() ([]models.Product, error) {
 	for rows.Next() {
 		var product models.Product
 		if err := rows.Scan(&product.ID, &product.Name, &product.Description, &product.Price); err != nil {
+			ps.Log.Errorf("Error scanning product row: %v", err)
 			return nil, err
 		}
 		products = append(products, product)
@@ -41,12 +48,15 @@ func (ps *ProductsService) GetAllProducts() ([]models.Product, error) {
 }
 
 func (ps *ProductsService) GetProductById(id int) (*models.Product, error) {
+	ps.Log.Debugf("Fetching product with ID: %d from database", id)
+
 	var product models.Product
 	err := ps.DB.QueryRow("SELECT * FROM Products WHERE id = ?", id).Scan(&product.ID, &product.Name, &product.Description, &product.Price)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("product not found")
 		}
+		ps.Log.Errorf("Error fetching product: %v", err)
 		return nil, err
 	}
 
@@ -54,8 +64,11 @@ func (ps *ProductsService) GetProductById(id int) (*models.Product, error) {
 }
 
 func (ps *ProductsService) AddProduct(product *models.Product) error {
+	ps.Log.Debugf("Creating new product in database, data: %+v", product)
+
 	result, err := ps.DB.Exec("INSERT INTO Products (name, description, price) VALUES (?, ?, ?)", product.Name, product.Description, product.Price)
 	if err != nil {
+		ps.Log.Errorf("Error creating new product: %v", err)
 		return err
 	}
 
@@ -66,14 +79,18 @@ func (ps *ProductsService) AddProduct(product *models.Product) error {
 }
 
 func (ps *ProductsService) UpdateProduct(id int, product *models.Product) (*models.Product, error) {
+	ps.Log.Debugf("Updating product with ID: %d in database, data: %+v", id, product)
+
 	_, err := ps.DB.Exec("UPDATE Products SET name = ?, description = ?, price = ? WHERE id = ?", product.Name, product.Description, product.Price, id)
 	if err != nil {
+		ps.Log.Errorf("Error updating product: %v", err)
 		return nil, err
 	}
 
 	// Fetch the updated product from the database
 	updatedProduct, err := ps.GetProductById(id)
 	if err != nil {
+		ps.Log.Errorf("Error fetching updated product: %v", err)
 		return nil, err
 	}
 
@@ -81,6 +98,8 @@ func (ps *ProductsService) UpdateProduct(id int, product *models.Product) (*mode
 }
 
 func (ps *ProductsService) PatchProduct(id int, product *models.Product) (*models.Product, error) {
+	ps.Log.Debugf("Patching product with ID: %d in database, data: %+v", id, product)
+
 	// Build the SQL query dynamically based on the provided fields
 	var updates []string
 	var args []interface{}
@@ -107,12 +126,14 @@ func (ps *ProductsService) PatchProduct(id int, product *models.Product) (*model
 
 	_, err := ps.DB.Exec(updateQuery, args...)
 	if err != nil {
+		ps.Log.Errorf("Error updating product: %v", err)
 		return nil, err
 	}
 
 	// Fetch the updated product from the database
 	updatedProduct, err := ps.GetProductById(id)
 	if err != nil {
+		ps.Log.Errorf("Error fetching updated product: %v", err)
 		return nil, err
 	}
 
@@ -120,6 +141,13 @@ func (ps *ProductsService) PatchProduct(id int, product *models.Product) (*model
 }
 
 func (ps *ProductsService) DeleteProduct(id int) error {
+	ps.Log.Debugf("Deleting product with ID: %d from database", id)
+
 	_, err := ps.DB.Exec("DELETE FROM Products WHERE id = ?", id)
-	return err
+	if err != nil {
+		ps.Log.Errorf("Error deleting product: %v", err)
+		return err
+	}
+
+	return nil
 }
