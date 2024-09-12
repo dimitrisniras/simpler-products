@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"simpler-products/models"
 	"simpler-products/services"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +22,18 @@ func GetProductById(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 func AddProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, "")
+		var product models.Product
+		if err := c.ShouldBindJSON(&product); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if err := ps.AddProduct(&product); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusCreated, product)
 	}
 }
 
