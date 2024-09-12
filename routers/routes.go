@@ -12,8 +12,8 @@ import (
 func NewRouter(log *logrus.Logger, ps services.ProductsServiceInterface) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Recovery())
+	router.Use(middlewares.ResponseFormatter(log))
 	router.Use(middlewares.JSONLoggerMiddleware())
-	router.Use(middlewares.GinErrorHandlerMiddleware(log))
 
 	api := router.Group("/api")
 

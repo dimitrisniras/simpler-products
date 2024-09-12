@@ -16,7 +16,7 @@ var (
 )
 
 type ProductsServiceInterface interface {
-	GetAllProducts() ([]models.Product, error)
+	GetAllProducts(limit, offset int) ([]models.Product, int, error)
 	GetProductById(id string) (*models.Product, error)
 	AddProduct(product *models.Product) error
 	UpdateProduct(id string, product *models.Product) (*models.Product, error)
@@ -29,13 +29,22 @@ type ProductsService struct {
 	Log *logrus.Logger
 }
 
-func (ps *ProductsService) GetAllProducts() ([]models.Product, error) {
-	ps.Log.Debug("Fetching all products from database")
+func (ps *ProductsService) GetAllProducts(limit, offset int) ([]models.Product, int, error) {
+	ps.Log.Debugf("Fetching products from database, limit: %d, offset: %d", limit, offset)
 
-	rows, err := ps.DB.Query("SELECT * FROM Products")
+	// 1. Get the total count of products
+	var totalCount int
+	err := ps.DB.QueryRow("SELECT COUNT(*) FROM Products").Scan(&totalCount)
+	if err != nil {
+		ps.Log.Errorf("Error getting total product count: %v", err)
+		return nil, 0, err
+	}
+
+	// 2. Fetch paginated products
+	rows, err := ps.DB.Query("SELECT * FROM Products LIMIT ? OFFSET ?", limit, offset)
 	if err != nil {
 		ps.Log.Errorf("Error fetching products: %v", err)
-		return nil, err
+		return nil, totalCount, err
 	}
 	defer rows.Close()
 
@@ -44,12 +53,12 @@ func (ps *ProductsService) GetAllProducts() ([]models.Product, error) {
 		var product models.Product
 		if err := rows.Scan(&product.ID, &product.Name, &product.Description, &product.Price); err != nil {
 			ps.Log.Errorf("Error scanning product row: %v", err)
-			return nil, err
+			return nil, totalCount, err
 		}
 		products = append(products, product)
 	}
 
-	return products, nil
+	return products, totalCount, nil
 }
 
 func (ps *ProductsService) GetProductById(id string) (*models.Product, error) {

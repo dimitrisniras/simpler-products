@@ -2,10 +2,8 @@ package middlewares
 
 import (
 	"encoding/json"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 func JSONLoggerMiddleware() gin.HandlerFunc {
@@ -25,18 +23,4 @@ func JSONLoggerMiddleware() gin.HandlerFunc {
 			return string(s) + "\n"
 		},
 	)
-}
-
-func GinErrorHandlerMiddleware(log *logrus.Logger) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
-
-		if len(c.Errors) > 0 {
-			// Log the error
-			log.Println(c.Errors.ByType(gin.ErrorTypePrivate).String())
-
-			// Send a generic error response to the client
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
-		}
-	}
 }
