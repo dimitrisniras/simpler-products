@@ -10,7 +10,7 @@ type ProductsServiceInterface interface {
 	GetAllProducts() ([]models.Product, error)
 	GetProductById(id int) (*models.Product, error)
 	AddProduct(product *models.Product) error
-	UpdateProduct()
+	UpdateProduct(id int, product *models.Product) (*models.Product, error)
 	PatchProduct()
 	DeleteProduct()
 }
@@ -63,7 +63,19 @@ func (ps *ProductsService) AddProduct(product *models.Product) error {
 	return nil
 }
 
-func (ps *ProductsService) UpdateProduct() {
+func (ps *ProductsService) UpdateProduct(id int, product *models.Product) (*models.Product, error) {
+	_, err := ps.DB.Exec("UPDATE Products SET name = ?, description = ?, price = ? WHERE id = ?", product.Name, product.Description, product.Price, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Fetch the updated product from the database
+	updatedProduct, err := ps.GetProductById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedProduct, nil
 }
 
 func (ps *ProductsService) PatchProduct() {

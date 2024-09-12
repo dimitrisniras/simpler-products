@@ -56,7 +56,26 @@ func AddProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 func UpdateProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, "")
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+			return
+		}
+
+		var product models.Product
+
+		if err := c.ShouldBindJSON(&product); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		updatedProduct, err := ps.UpdateProduct(id, &product)
+		if err != nil {
+			c.Error(err)
+			return
+		}
+
+		c.JSON(http.StatusOK, updatedProduct)
 	}
 }
 
