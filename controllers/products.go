@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"simpler-products/models"
 	"simpler-products/services"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +22,18 @@ func GetAllProducts(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 func GetProductById(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, "")
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+			return
+		}
+
+		product, err := ps.GetProductById(id)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, product)
 	}
 }
 

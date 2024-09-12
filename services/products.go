@@ -2,12 +2,13 @@ package services
 
 import (
 	"database/sql"
+	"fmt"
 	"simpler-products/models"
 )
 
 type ProductsServiceInterface interface {
 	GetAllProducts() ([]models.Product, error)
-	GetProductById()
+	GetProductById(id int) (*models.Product, error)
 	AddProduct(product *models.Product) error
 	UpdateProduct()
 	PatchProduct()
@@ -37,7 +38,17 @@ func (ps *ProductsService) GetAllProducts() ([]models.Product, error) {
 	return products, nil
 }
 
-func (ps *ProductsService) GetProductById() {
+func (ps *ProductsService) GetProductById(id int) (*models.Product, error) {
+	var product models.Product
+	err := ps.DB.QueryRow("SELECT * FROM Products WHERE id = ?", id).Scan(&product.ID, &product.Name, &product.Description, &product.Price)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("product not found")
+		}
+		return nil, err
+	}
+
+	return &product, nil
 }
 
 func (ps *ProductsService) AddProduct(product *models.Product) error {
