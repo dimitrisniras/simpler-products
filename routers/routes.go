@@ -30,7 +30,6 @@ func NewRouter(log *logrus.Logger, ps services.ProductsServiceInterface) *gin.En
 		products.GET("/:id", controllers.GetProductById(ps))
 		products.POST("", controllers.AddProduct(ps))
 		products.PUT("/:id", controllers.UpdateProduct(ps))
-		products.PATCH("/:id", controllers.PatchProduct(ps))
 		products.DELETE("/:id", controllers.DeleteProduct(ps))
 	}
 
