@@ -14,7 +14,7 @@ type ProductsServiceInterface interface {
 	AddProduct(product *models.Product) error
 	UpdateProduct(id int, product *models.Product) (*models.Product, error)
 	PatchProduct(id int, product *models.Product) (*models.Product, error)
-	DeleteProduct()
+	DeleteProduct(id int) error
 }
 
 type ProductsService struct {
@@ -119,5 +119,7 @@ func (ps *ProductsService) PatchProduct(id int, product *models.Product) (*model
 	return updatedProduct, nil
 }
 
-func (ps *ProductsService) DeleteProduct() {
+func (ps *ProductsService) DeleteProduct(id int) error {
+	_, err := ps.DB.Exec("DELETE FROM Products WHERE id = ?", id)
+	return err
 }
