@@ -10,7 +10,12 @@ import (
 
 func GetAllProducts(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(http.StatusOK, "")
+		products, err := ps.GetAllProducts()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, products)
 	}
 }
 
