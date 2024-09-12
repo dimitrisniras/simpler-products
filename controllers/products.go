@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 	"simpler-products/models"
 	"simpler-products/services"
@@ -30,7 +31,11 @@ func GetProductById(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 		product, err := ps.GetProductById(id)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			if errors.Is(err, services.ErrProductNotFound) {
+				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			} else {
+				c.Error(err)
+			}
 			return
 		}
 		c.JSON(http.StatusOK, product)
@@ -71,7 +76,11 @@ func UpdateProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 		updatedProduct, err := ps.UpdateProduct(id, &product)
 		if err != nil {
-			c.Error(err)
+			if errors.Is(err, services.ErrProductNotFound) {
+				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			} else {
+				c.Error(err)
+			}
 			return
 		}
 
@@ -97,7 +106,11 @@ func PatchProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 		updatedProduct, err := ps.PatchProduct(id, &product)
 		if err != nil {
-			c.Error(err)
+			if errors.Is(err, services.ErrProductNotFound) {
+				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			} else {
+				c.Error(err)
+			}
 			return
 		}
 
@@ -114,7 +127,11 @@ func DeleteProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 		}
 
 		if err := ps.DeleteProduct(id); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			if errors.Is(err, services.ErrProductNotFound) {
+				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			} else {
+				c.Error(err)
+			}
 			return
 		}
 
