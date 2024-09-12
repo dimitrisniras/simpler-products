@@ -10,6 +10,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var (
+	ErrProductNotFound = errors.New("product not found")
+)
+
 type ProductsServiceInterface interface {
 	GetAllProducts() ([]models.Product, error)
 	GetProductById(id int) (*models.Product, error)
@@ -54,7 +58,7 @@ func (ps *ProductsService) GetProductById(id int) (*models.Product, error) {
 	err := ps.DB.QueryRow("SELECT * FROM Products WHERE id = ?", id).Scan(&product.ID, &product.Name, &product.Description, &product.Price)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("product not found")
+			return nil, ErrProductNotFound
 		}
 		ps.Log.Errorf("Error fetching product: %v", err)
 		return nil, err
@@ -90,7 +94,10 @@ func (ps *ProductsService) UpdateProduct(id int, product *models.Product) (*mode
 	// Fetch the updated product from the database
 	updatedProduct, err := ps.GetProductById(id)
 	if err != nil {
-		ps.Log.Errorf("Error fetching updated product: %v", err)
+		if err == sql.ErrNoRows {
+			return nil, ErrProductNotFound
+		}
+		ps.Log.Errorf("Error updating product: %v", err)
 		return nil, err
 	}
 
@@ -133,7 +140,10 @@ func (ps *ProductsService) PatchProduct(id int, product *models.Product) (*model
 	// Fetch the updated product from the database
 	updatedProduct, err := ps.GetProductById(id)
 	if err != nil {
-		ps.Log.Errorf("Error fetching updated product: %v", err)
+		if err == sql.ErrNoRows {
+			return nil, ErrProductNotFound
+		}
+		ps.Log.Errorf("Error updating product: %v", err)
 		return nil, err
 	}
 
@@ -145,6 +155,9 @@ func (ps *ProductsService) DeleteProduct(id int) error {
 
 	_, err := ps.DB.Exec("DELETE FROM Products WHERE id = ?", id)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return ErrProductNotFound
+		}
 		ps.Log.Errorf("Error deleting product: %v", err)
 		return err
 	}
