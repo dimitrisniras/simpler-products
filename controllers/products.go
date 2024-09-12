@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"simpler-products/models"
 	"simpler-products/services"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,12 +22,7 @@ func GetAllProducts(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 func GetProductById(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
-			return
-		}
-
+		id := c.Param("id")
 		product, err := ps.GetProductById(id)
 		if err != nil {
 			if errors.Is(err, services.ErrProductNotFound) {
@@ -61,14 +55,9 @@ func AddProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 func UpdateProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
-			return
-		}
+		id := c.Param("id")
 
 		var product models.Product
-
 		if err := c.ShouldBindJSON(&product); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -90,11 +79,7 @@ func UpdateProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 func PatchProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
-			return
-		}
+		id := c.Param("id")
 
 		var product models.Product
 
@@ -120,11 +105,7 @@ func PatchProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 func DeleteProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
-			return
-		}
+		id := c.Param("id")
 
 		if err := ps.DeleteProduct(id); err != nil {
 			if errors.Is(err, services.ErrProductNotFound) {
