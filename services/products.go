@@ -2,8 +2,10 @@ package services
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"simpler-products/models"
+	"strings"
 )
 
 type ProductsServiceInterface interface {
@@ -11,7 +13,7 @@ type ProductsServiceInterface interface {
 	GetProductById(id int) (*models.Product, error)
 	AddProduct(product *models.Product) error
 	UpdateProduct(id int, product *models.Product) (*models.Product, error)
-	PatchProduct()
+	PatchProduct(id int, product *models.Product) (*models.Product, error)
 	DeleteProduct()
 }
 
@@ -78,7 +80,43 @@ func (ps *ProductsService) UpdateProduct(id int, product *models.Product) (*mode
 	return updatedProduct, nil
 }
 
-func (ps *ProductsService) PatchProduct() {
+func (ps *ProductsService) PatchProduct(id int, product *models.Product) (*models.Product, error) {
+	// Build the SQL query dynamically based on the provided fields
+	var updates []string
+	var args []interface{}
+
+	if product.Name != "" {
+		updates = append(updates, "name = ?")
+		args = append(args, product.Name)
+	}
+	if product.Description != "" {
+		updates = append(updates, "description = ?")
+		args = append(args, product.Description)
+	}
+	if product.Price != 0 { // Assuming 0 is not a valid price
+		updates = append(updates, "price = ?")
+		args = append(args, product.Price)
+	}
+
+	if len(updates) == 0 {
+		return nil, errors.New("no fields to update")
+	}
+
+	updateQuery := fmt.Sprintf("UPDATE Products SET %s WHERE id = ?", strings.Join(updates, ", "))
+	args = append(args, id)
+
+	_, err := ps.DB.Exec(updateQuery, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	// Fetch the updated product from the database
+	updatedProduct, err := ps.GetProductById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedProduct, nil
 }
 
 func (ps *ProductsService) DeleteProduct() {
