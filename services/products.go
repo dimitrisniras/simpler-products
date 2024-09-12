@@ -153,18 +153,11 @@ func (ps *ProductsService) PatchProduct(id int, product *models.Product) (*model
 func (ps *ProductsService) DeleteProduct(id int) error {
 	ps.Log.Debugf("Deleting product with ID: %d from database", id)
 
-	// Fetch the product to be deleted from the database
-	_, err := ps.GetProductById(id)
+	_, err := ps.DB.Exec("DELETE FROM Products WHERE id = ?", id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return ErrProductNotFound
 		}
-		ps.Log.Errorf("Error deleting product: %v", err)
-		return err
-	}
-
-	_, err = ps.DB.Exec("DELETE FROM Products WHERE id = ?", id)
-	if err != nil {
 		ps.Log.Errorf("Error deleting product: %v", err)
 		return err
 	}

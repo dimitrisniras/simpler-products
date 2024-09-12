@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"simpler-products/controllers"
 	"simpler-products/services"
-	"simpler-products/validators"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -36,42 +35,11 @@ func ErrorHandlerMiddleware(log *logrus.Logger) gin.HandlerFunc {
 		c.Next()
 
 		if len(c.Errors) > 0 {
-			log.Error(c.Errors.ByType(gin.ErrorTypePrivate).String())
+			// Log the error
+			log.Println(c.Errors.ByType(gin.ErrorTypePrivate).String())
 
-			// Construct a structured error response with an array of errors
-			var errorResponse struct {
-				Status int                 `json:"status"`
-				Errors []map[string]string `json:"errors"`
-			}
-
-			switch c.Errors[0].Err.(type) {
-			case *validators.ValidationError:
-				// Handle validation errors
-				err := c.Errors[0].Err.(*validators.ValidationError)
-				errorResponse.Status = err.StatusCode
-				errorResponse.Errors = err.Errors
-			case error:
-				// Handle other errors, ensuring a consistent format
-				switch c.Errors[0].Type {
-				case gin.ErrorTypeBind:
-					errorResponse.Status = http.StatusBadRequest
-					errorResponse.Errors = []map[string]string{{"error": "Bad Request"}}
-				case gin.ErrorTypePrivate:
-					// Respect specific status codes set by handlers
-					if c.Writer.Status() != 0 {
-						errorResponse.Status = c.Writer.Status()
-					} else {
-						errorResponse.Status = http.StatusInternalServerError
-					}
-					errorResponse.Errors = []map[string]string{{"error": c.Errors[0].Err.Error()}}
-				default:
-					errorResponse.Status = http.StatusInternalServerError
-					errorResponse.Errors = []map[string]string{{"error": "Internal Server Error"}}
-				}
-			}
-
-			// Send the structured error response
-			c.JSON(errorResponse.Status, errorResponse)
+			// Send a generic error response to the client
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 		}
 	}
 }
