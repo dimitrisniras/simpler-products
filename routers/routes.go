@@ -13,6 +13,13 @@ func NewRouter(ps services.ProductsServiceInterface) *gin.Engine {
 
 	api := router.Group("/api")
 
+	// ping routes
+	{
+		ping := api.Group("/ping")
+		ping.GET("", controllers.Ping())
+	}
+
+	// products routes
 	{
 		products := api.Group("/products")
 		products.GET("", controllers.GetAllProducts(ps))
