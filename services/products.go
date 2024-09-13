@@ -41,7 +41,7 @@ func (ps *ProductsService) GetAllProducts(limit, offset int) ([]models.Product, 
 	rows, err := ps.DB.Query("SELECT * FROM Products LIMIT ? OFFSET ?", limit, offset)
 	if err != nil {
 		ps.Log.Errorf("Error fetching products: %v", err)
-		return nil, totalCount, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -50,7 +50,7 @@ func (ps *ProductsService) GetAllProducts(limit, offset int) ([]models.Product, 
 		var product models.Product
 		if err := rows.Scan(&product.ID, &product.Name, &product.Description, &product.Price); err != nil {
 			ps.Log.Errorf("Error scanning product row: %v", err)
-			return nil, totalCount, err
+			return nil, 0, err
 		}
 		products = append(products, product)
 	}
