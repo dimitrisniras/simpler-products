@@ -43,13 +43,15 @@ func ValidateProduct(c *gin.Context) (*models.Product, error) {
 				}
 			}
 
-			c.Status(http.StatusBadRequest)
-			c.Set("errors", err)
-
-			return nil, &ValidationError{
+			res := &ValidationError{
 				Errors: out,
 			}
+
+			c.Status(http.StatusBadRequest)
+			c.Set("errors", res)
+			return nil, res
 		}
+		c.Set("errors", err)
 		return nil, err
 	}
 	return &product, nil
