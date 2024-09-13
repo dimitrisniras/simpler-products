@@ -2,11 +2,12 @@ package middlewares
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"strings"
+
+	custom_errors "simpler-products/errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -21,7 +22,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 			authHeader := c.GetHeader("Authorization")
 			if authHeader == "" {
 				c.Status(http.StatusUnauthorized)
-				c.Set("errors", errors.New("authorization header missing"))
+				c.Set("errors", custom_errors.ErrAuthorizationHeaderMissing)
 				return
 			}
 
@@ -29,7 +30,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 			parts := strings.Split(authHeader, " ")
 			if len(parts) != 2 || parts[0] != "Bearer" {
 				c.Status(http.StatusUnauthorized)
-				c.Set("errors", errors.New("invalid Authorization header format"))
+				c.Set("errors", custom_errors.ErrAuthorizationHeaderFormat)
 				return
 			}
 			tokenString := parts[1]
@@ -40,7 +41,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 			publicKeyBytes, err := base64.StdEncoding.DecodeString(secretKey)
 			if err != nil {
 				c.Status(http.StatusUnauthorized)
-				c.Set("errors", errors.New("error decoding public key"))
+				c.Set("errors", custom_errors.ErrDecodingPublicKey)
 				return
 			}
 
@@ -48,7 +49,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 			publicKey, err := jwt.ParseRSAPublicKeyFromPEM(publicKeyBytes)
 			if err != nil {
 				c.Status(http.StatusUnauthorized)
-				c.Set("errors", errors.New("error parsing public key"))
+				c.Set("errors", custom_errors.ErrParsingPublicKey)
 				return
 			}
 
@@ -64,7 +65,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 
 			if err != nil || !token.Valid {
 				c.Status(http.StatusUnauthorized)
-				c.Set("errors", errors.New("invalid token"))
+				c.Set("errors", custom_errors.ErrInvalidToken)
 				return
 			}
 		}

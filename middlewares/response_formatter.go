@@ -34,9 +34,6 @@ func ResponseFormatter(log *logrus.Logger) gin.HandlerFunc {
 				response.Status = http.StatusInternalServerError // Default to 500 if no status is set
 			}
 
-			// Log the error
-			log.Error(c.Errors.ByType(gin.ErrorTypePrivate).String())
-
 			// Format the errors consistently
 			formattedErrors := make([]map[string]any, 0)
 			switch errors.(type) {
