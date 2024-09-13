@@ -20,8 +20,8 @@ services:
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_DATABASE=products_db
-      - MYSQL_USER=root
-      - MYSQL_ROOT_PASSWORD=pass!
+      - MYSQL_DATABASE=your_db_name
+      - MYSQL_USER=your_db_user
+      - MYSQL_ROOT_PASSWORD=your_db_password
     volumes:
       - ./mysql-data:/var/lib/mysql
