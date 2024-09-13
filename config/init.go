@@ -14,12 +14,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// Define a generic interface for any service that might be used by the application
+type ServiceContainer interface{}
+
 type Config struct {
-	Port            string
-	LogLevel        string
-	DB              *sql.DB
-	ProductsService services.ProductsServiceInterface
-	Log             *logrus.Logger
+	Port     string
+	DB       *sql.DB
+	Services ServiceContainer
+	Log      *logrus.Logger
 }
 
 func Init(log *logrus.Logger) (*Config, error) {
@@ -57,6 +59,9 @@ func Init(log *logrus.Logger) (*Config, error) {
 	} else if logLevel == "release" {
 		gin.SetMode(gin.ReleaseMode)
 		log.SetLevel(logrus.InfoLevel)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+		log.SetLevel(logrus.InfoLevel)
 	}
 
 	// Database setup
@@ -65,17 +70,20 @@ func Init(log *logrus.Logger) (*Config, error) {
 		return nil, err
 	}
 
-	// Create services
-	productsService := &services.ProductsService{
-		DB:  db,
-		Log: log,
+	// Create services and store them in a struct implementing ServiceContainer
+	services := struct {
+		services.ProductsServiceInterface
+	}{
+		&services.ProductsService{
+			DB:  db,
+			Log: log,
+		},
 	}
 
 	return &Config{
-		Port:            port,
-		LogLevel:        logLevel,
-		DB:              db,
-		ProductsService: productsService,
-		Log:             log,
+		Port:     port,
+		DB:       db,
+		Services: services,
+		Log:      log,
 	}, nil
 }

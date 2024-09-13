@@ -72,7 +72,7 @@ This is a Go-based RESTful API for managing products in a store. It provides end
         CREATE TABLE Products (
             id VARCHAR(255) PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
-            description TEXT NOT NULL,
+            description VARCHAR(255) NOT NULL,
             price DECIMAL(10, 2) NOT NULL
         );
         ```
@@ -110,6 +110,7 @@ This is a Go-based RESTful API for managing products in a store. It provides end
     ```
 
     This will build the Go application image, pull the MySQL image, and start both containers. The API will be accessible at `http://localhost:8080`.
+    Remember if you're a Mac OS user you'll need to specify the DB_HOST as `docker.for.mac.localhost`
 
 ## Testing
 
@@ -122,6 +123,46 @@ This is a Go-based RESTful API for managing products in a store. It provides end
     ```
 
     This will execute all the unit tests in the `tests` directory.
+
+## Authentication
+
+This API utilizes JWT (JSON Web Token) for authentication. You'll need to generate an RSA key pair (private and public keys) and set the public key as an environment variable.
+
+### Generating Keys
+
+You can generate an RSA key pair using OpenSSL:
+
+```bash
+openssl genrsa -out private.pem 2048
+openssl rsa -in private.pem -pubout -out public.pem
+```
+
+* The `private.pem` file contains your private key, which should be kept secure and not shared.
+* The `public.pem` file contains your public key, which will be used by the API to verify JWTs.
+
+### Setting up the Public Key
+
+1. **Encode the public key to Base64:**
+
+    ```bash
+    export JWT_PUBLIC_KEY=$(cat public.pem | base64 -w 0)
+    ```
+
+2. **Set the environment variable:**
+
+* **Locally:** Include the following line in your `.env` file, replacing `your_base64_encoded_public_key` with the actual Base64-encoded value of your public key:
+
+    ```bash
+    JWT_PUBLIC_KEY=your_base64_encoded_public_key
+    ```
+
+* **Docker Compose:** Add the following environment variable to the app service in your `docker-compose.yml` file:
+
+    ```yaml
+    environment:
+    - JWT_PUBLIC_KEY=your_base64_encoded_public_key
+    # ... other environment variables
+    ```
 
 ## API Endpoints
 

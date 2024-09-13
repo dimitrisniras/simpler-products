@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"net/http"
+	custom_errors "simpler-products/errors"
 	"simpler-products/models"
 	"simpler-products/services"
 	"simpler-products/validators"
@@ -18,16 +19,16 @@ func GetAllProducts(ps services.ProductsServiceInterface) gin.HandlerFunc {
 		offsetStr := c.DefaultQuery("offset", "0") // Default offset is 0
 
 		limit, err := strconv.Atoi(limitStr)
-		if err != nil || limit <= 0 {
+		if err != nil || limit <= 0 || limit > 100 {
 			c.Status(http.StatusBadRequest)
-			c.Set("errors", errors.New("invalid limit parameter"))
+			c.Set("errors", custom_errors.ErrInvalidLimitParameter)
 			return
 		}
 
 		offset, err := strconv.Atoi(offsetStr)
 		if err != nil || offset < 0 {
 			c.Status(http.StatusBadRequest)
-			c.Set("errors", errors.New("invalid offset parameter"))
+			c.Set("errors", custom_errors.ErrInvalidOffsetParameter)
 			return
 		}
 
@@ -57,7 +58,7 @@ func GetProductById(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 		product, err := ps.GetProductById(id)
 		if err != nil {
-			if errors.Is(err, services.ErrProductNotFound) {
+			if errors.Is(err, custom_errors.ErrProductNotFound) {
 				c.Status(http.StatusNotFound)
 			}
 			c.Set("errors", err)
@@ -101,7 +102,7 @@ func UpdateProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 		updatedProduct, err := ps.UpdateProduct(id, product)
 		if err != nil {
-			if errors.Is(err, services.ErrProductNotFound) {
+			if errors.Is(err, custom_errors.ErrProductNotFound) {
 				c.Status(http.StatusNotFound)
 			}
 			c.Set("errors", err)
@@ -121,7 +122,7 @@ func DeleteProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 		}
 
 		if err := ps.DeleteProduct(id); err != nil {
-			if errors.Is(err, services.ErrProductNotFound) {
+			if errors.Is(err, custom_errors.ErrProductNotFound) {
 				c.Status(http.StatusNotFound)
 			}
 			c.Set("errors", err)

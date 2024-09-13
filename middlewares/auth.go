@@ -1,11 +1,11 @@
 package middlewares
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -14,10 +14,9 @@ import (
 
 func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		secretKey := os.Getenv("JWT_SECRET_KEY")
 		authEnabled := os.Getenv("AUTH_ENABLED")
 
-		if boolValue, err := strconv.ParseBool(authEnabled); err == nil && boolValue == true {
+		if authEnabled == "true" {
 			// Get the Authorization header
 			authHeader := c.GetHeader("Authorization")
 			if authHeader == "" {
@@ -35,21 +34,38 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 			}
 			tokenString := parts[1]
 
+			secretKey := os.Getenv("JWT_SECRET_KEY")
+
+			// Decode the Base64-encoded public key
+			publicKeyBytes, err := base64.StdEncoding.DecodeString(secretKey)
+			if err != nil {
+				c.Status(http.StatusUnauthorized)
+				c.Set("errors", errors.New("error decoding public key"))
+				return
+			}
+
+			// Parse the public key
+			publicKey, err := jwt.ParseRSAPublicKeyFromPEM(publicKeyBytes)
+			if err != nil {
+				c.Status(http.StatusUnauthorized)
+				c.Set("errors", errors.New("error parsing public key"))
+				return
+			}
+
 			// Parse and validate the token
 			token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-				// Make sure the signing method is HMAC
-				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				// Make sure the signing method is RSA
+				if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 					return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 				}
 
-				return []byte(secretKey), nil
+				return publicKey, nil
 			})
 
 			if err != nil || !token.Valid {
 				c.Status(http.StatusUnauthorized)
 				c.Set("errors", errors.New("invalid token"))
 				return
-
 			}
 		}
 

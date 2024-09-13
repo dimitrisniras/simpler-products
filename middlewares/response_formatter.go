@@ -28,7 +28,7 @@ func ResponseFormatter(log *logrus.Logger) gin.HandlerFunc {
 
 		// Set the status code based on the presence of errors
 		if errorsExist {
-			if c.Writer.Status() != 0 {
+			if c.Writer.Status() != 0 && c.Writer.Status() != 200 {
 				response.Status = c.Writer.Status()
 			} else {
 				response.Status = http.StatusInternalServerError // Default to 500 if no status is set

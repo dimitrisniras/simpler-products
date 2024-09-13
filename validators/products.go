@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	custom_errors "simpler-products/errors"
 	"simpler-products/models"
 
 	"github.com/gin-gonic/gin"
@@ -19,10 +20,9 @@ var validate *validator.Validate
 func ValidateProductID(c *gin.Context) (string, error) {
 	id := c.Param("id")
 	if id == "" {
-		err := errors.New("product id is required")
 		c.Status(http.StatusBadRequest)
-		c.Set("errors", err)
-		return "", err
+		c.Set("errors", custom_errors.ErrInvalidProductID)
+		return "", custom_errors.ErrInvalidProductID
 	}
 
 	return id, nil
@@ -43,13 +43,15 @@ func ValidateProduct(c *gin.Context) (*models.Product, error) {
 				}
 			}
 
-			c.Status(http.StatusBadRequest)
-			c.Set("errors", err)
-
-			return nil, &ValidationError{
+			res := &ValidationError{
 				Errors: out,
 			}
+
+			c.Status(http.StatusBadRequest)
+			c.Set("errors", res)
+			return nil, res
 		}
+		c.Set("errors", err)
 		return nil, err
 	}
 	return &product, nil

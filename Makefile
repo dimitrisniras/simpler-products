@@ -1,3 +1,17 @@
+# Project variables
+PROJECT_NAME = simpler-products-app
+GO_VERSION = 1.23
+
+# Golang standard bin directory.
+GOPATH ?= $(shell go env GOPATH)
+BIN_DIR := $(GOPATH)/bin
+GOLANGCI_LINT := $(BIN_DIR)/golangci-lint
+
+# Phony targets
+.PHONY: all install-deps build run test test-cover clean clean-deps lint fmt docker-build docker-run docker-stop
+
+all: clean-all install-deps build run
+
 install-deps:
 	go get github.com/gin-gonic/gin
 	go get github.com/joho/godotenv
@@ -18,3 +32,30 @@ run:
 
 test:
 	go test ./tests -v
+
+# Cleaning
+clean:
+	rm -rf bin/*
+
+clean-deps:
+	go clean -modcache
+
+clean-all: clean clean-deps
+
+# Linting and formatting
+fmt:
+	go fmt ./...
+
+test-cover:
+	go test -coverprofile=coverage.out ./...
+	go tool cover -html=coverage.out
+
+# Docker
+docker-build:
+	docker build -t ${PROJECT_NAME} .
+
+docker-run:
+	docker-compose up -d
+
+docker-stop:
+	docker-compose down

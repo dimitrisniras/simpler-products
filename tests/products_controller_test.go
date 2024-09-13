@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"simpler-products/controllers"
+	custom_errors "simpler-products/errors"
 	"simpler-products/models"
-	"simpler-products/services"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -37,7 +37,7 @@ func (m *mockProductService) GetProductById(id string) (*models.Product, error) 
 			return &p, nil
 		}
 	}
-	return nil, services.ErrProductNotFound
+	return nil, custom_errors.ErrProductNotFound
 }
 
 func (m *mockProductService) AddProduct(product *models.Product) error {
@@ -59,7 +59,7 @@ func (m *mockProductService) UpdateProduct(id string, product *models.Product) (
 			return product, nil
 		}
 	}
-	return nil, services.ErrProductNotFound
+	return nil, custom_errors.ErrProductNotFound
 }
 
 func (m *mockProductService) DeleteProduct(id string) error {
@@ -74,7 +74,7 @@ func (m *mockProductService) DeleteProduct(id string) error {
 			return nil
 		}
 	}
-	return services.ErrProductNotFound
+	return custom_errors.ErrProductNotFound
 }
 
 func TestGetAllProductsController(t *testing.T) {
@@ -169,7 +169,63 @@ func TestGetAllProductsController(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, c.Writer.Status())
 		assert.Equal(t, dataExists, false)
 		assert.Equal(t, paginationExists, false)
-		assert.Equal(t, errors.New("invalid limit parameter"), err)
+		assert.Equal(t, custom_errors.ErrInvalidLimitParameter, err)
+	})
+
+	t.Run("InvalidLimitLowerBound", func(t *testing.T) {
+		// Create a mock ProductService (not used in this case)
+		mockService := &mockProductService{}
+
+		// Create a request with an invalid limit
+		req, _ := http.NewRequest("GET", "/products?limit=-1", nil)
+
+		// Create a response recorder
+		w := httptest.NewRecorder()
+
+		// Create a Gin context
+		c, _ := gin.CreateTestContext(w)
+		c.Request = req
+
+		// Call the handler function
+		controllers.GetAllProducts(mockService)(c)
+
+		_, dataExists := c.Get("data")
+		_, paginationExists := c.Get("pagination")
+		err, _ := c.Get("errors")
+
+		// Assertions
+		assert.Equal(t, http.StatusBadRequest, c.Writer.Status())
+		assert.Equal(t, dataExists, false)
+		assert.Equal(t, paginationExists, false)
+		assert.Equal(t, custom_errors.ErrInvalidLimitParameter, err)
+	})
+
+	t.Run("InvalidLimitLowerBound", func(t *testing.T) {
+		// Create a mock ProductService (not used in this case)
+		mockService := &mockProductService{}
+
+		// Create a request with an invalid limit
+		req, _ := http.NewRequest("GET", "/products?limit=101", nil)
+
+		// Create a response recorder
+		w := httptest.NewRecorder()
+
+		// Create a Gin context
+		c, _ := gin.CreateTestContext(w)
+		c.Request = req
+
+		// Call the handler function
+		controllers.GetAllProducts(mockService)(c)
+
+		_, dataExists := c.Get("data")
+		_, paginationExists := c.Get("pagination")
+		err, _ := c.Get("errors")
+
+		// Assertions
+		assert.Equal(t, http.StatusBadRequest, c.Writer.Status())
+		assert.Equal(t, dataExists, false)
+		assert.Equal(t, paginationExists, false)
+		assert.Equal(t, custom_errors.ErrInvalidLimitParameter, err)
 	})
 
 	t.Run("InvalidOffset", func(t *testing.T) {
@@ -197,7 +253,7 @@ func TestGetAllProductsController(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, c.Writer.Status())
 		assert.Equal(t, dataExists, false)
 		assert.Equal(t, paginationExists, false)
-		assert.Equal(t, errors.New("invalid offset parameter"), err)
+		assert.Equal(t, custom_errors.ErrInvalidOffsetParameter, err)
 	})
 
 	t.Run("ServiceError", func(t *testing.T) {
@@ -295,7 +351,7 @@ func TestGetProductByIdController(t *testing.T) {
 		// Assertions
 		assert.Equal(t, http.StatusNotFound, c.Writer.Status())
 		assert.Equal(t, dataExists, false)
-		assert.Equal(t, services.ErrProductNotFound, err)
+		assert.Equal(t, custom_errors.ErrProductNotFound, err)
 	})
 
 	t.Run("InvalidID_Empty", func(t *testing.T) {
@@ -322,7 +378,7 @@ func TestGetProductByIdController(t *testing.T) {
 		// Assertions
 		assert.Equal(t, http.StatusBadRequest, c.Writer.Status())
 		assert.Equal(t, dataExists, false)
-		assert.Equal(t, errors.New("product id is required"), err)
+		assert.Equal(t, custom_errors.ErrInvalidProductID, err)
 	})
 
 	t.Run("ServiceError", func(t *testing.T) {
@@ -534,7 +590,7 @@ func TestUpdateProductController(t *testing.T) {
 		// Assertions
 		assert.Equal(t, http.StatusNotFound, c.Writer.Status())
 		assert.Equal(t, dataExists, false)
-		assert.Equal(t, services.ErrProductNotFound, err)
+		assert.Equal(t, custom_errors.ErrProductNotFound, err)
 	})
 
 	t.Run("InvalidID_Empty", func(t *testing.T) {
@@ -567,7 +623,7 @@ func TestUpdateProductController(t *testing.T) {
 		// Assertions
 		assert.Equal(t, http.StatusBadRequest, c.Writer.Status())
 		assert.Equal(t, dataExists, false)
-		assert.Equal(t, errors.New("product id is required"), err)
+		assert.Equal(t, custom_errors.ErrInvalidProductID, err)
 	})
 
 	t.Run("InvalidProductData", func(t *testing.T) {
@@ -698,7 +754,7 @@ func TestDeleteProductController(t *testing.T) {
 		// Assertions
 		assert.Equal(t, http.StatusNotFound, c.Writer.Status())
 		assert.Equal(t, dataExists, false)
-		assert.Equal(t, services.ErrProductNotFound, err)
+		assert.Equal(t, custom_errors.ErrProductNotFound, err)
 	})
 
 	t.Run("InvalidID_Empty", func(t *testing.T) {
@@ -725,7 +781,7 @@ func TestDeleteProductController(t *testing.T) {
 		// Assertions
 		assert.Equal(t, http.StatusBadRequest, c.Writer.Status())
 		assert.Equal(t, dataExists, false)
-		assert.Equal(t, errors.New("product id is required"), err)
+		assert.Equal(t, custom_errors.ErrInvalidProductID, err)
 	})
 
 	t.Run("ServiceError", func(t *testing.T) {
