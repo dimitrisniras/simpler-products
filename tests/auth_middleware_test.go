@@ -56,7 +56,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Create a request with the Authorization header
-		req, _ := http.NewRequest("GET", "/api/products", nil)
+		req, _ := http.NewRequest("GET", "/api/v1/v1/products", nil)
 		req.Header.Set("Authorization", "Bearer "+tokenString)
 
 		// Create a response recorder
@@ -89,7 +89,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 		invalidTokenString, _ := invalidToken.SignedString(invalidPrivateKey)
 
 		// Create a request with the Authorization header
-		req, _ := http.NewRequest("GET", "/api/products", nil)
+		req, _ := http.NewRequest("GET", "/api/v1/products", nil)
 		req.Header.Set("Authorization", "Bearer "+invalidTokenString)
 
 		// Create a response recorder
@@ -114,7 +114,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 
 	t.Run("MissingAuthorizationHeader", func(t *testing.T) {
 		// Create a request without the Authorization header
-		req, _ := http.NewRequest("GET", "/api/products", nil)
+		req, _ := http.NewRequest("GET", "/api/v1/products", nil)
 
 		// Create a response recorder
 		w := httptest.NewRecorder()
@@ -138,7 +138,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 
 	t.Run("InvalidAuthorizationHeaderFormat", func(t *testing.T) {
 		// Create a request with an invalid Authorization header format
-		req, _ := http.NewRequest("GET", "/api/products", nil)
+		req, _ := http.NewRequest("GET", "/api/v1/products", nil)
 		req.Header.Set("Authorization", "InvalidFormat")
 
 		// Create a response recorder
@@ -163,7 +163,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 
 	t.Run("AuthDisabled", func(t *testing.T) {
 		// Create a request (Authorization header doesn't matter in this case)
-		req, _ := http.NewRequest("GET", "/api/products", nil)
+		req, _ := http.NewRequest("GET", "/api/v1/products", nil)
 
 		// Create a response recorder
 		w := httptest.NewRecorder()

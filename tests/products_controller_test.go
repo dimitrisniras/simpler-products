@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"simpler-products/controllers"
+	"simpler-products/controllers/v1"
 	custom_errors "simpler-products/errors"
 	"simpler-products/models"
 	"testing"
