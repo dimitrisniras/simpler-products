@@ -19,7 +19,10 @@ var validate *validator.Validate
 func ValidateProductID(c *gin.Context) (string, error) {
 	id := c.Param("id")
 	if id == "" {
-		return "", errors.New("product ID is required")
+		err := errors.New("product id is required")
+		c.Status(http.StatusBadRequest)
+		c.Set("errors", err)
+		return "", err
 	}
 
 	return id, nil
@@ -39,7 +42,10 @@ func ValidateProduct(c *gin.Context) (*models.Product, error) {
 					})
 				}
 			}
+
 			c.Status(http.StatusBadRequest)
+			c.Set("errors", err)
+
 			return nil, &ValidationError{
 				Errors: out,
 			}

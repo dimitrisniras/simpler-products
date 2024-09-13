@@ -4,6 +4,7 @@ install-deps:
 	go get github.com/go-sql-driver/mysql
 	go get github.com/sirupsen/logrus
 	go get github.com/google/uuid
+	go get github.com/golang-jwt/jwt/v4
 	go get github.com/go-playground/validator/v10
 	go get github.com/dgrijalva/jwt-go
 	go get github.com/DATA-DOG/go-sqlmock

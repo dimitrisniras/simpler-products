@@ -126,9 +126,6 @@ func (ps *ProductsService) DeleteProduct(id string) error {
 
 	_, err = ps.DB.Exec("DELETE FROM Products WHERE id = ?", id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return ErrProductNotFound
-		}
 		ps.Log.Errorf("Error deleting product: %v", err)
 		return err
 	}

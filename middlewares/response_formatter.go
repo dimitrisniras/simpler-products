@@ -68,12 +68,12 @@ func ResponseFormatter(log *logrus.Logger) gin.HandlerFunc {
 				response.Status = http.StatusOK // Default to 200 OK if no status is set
 			}
 
-			// Include data only if present and the status code is 200 OK
+			// Include data only if present
 			if dataExists {
 				response.Data = data
 			}
 
-			// Include pagination only if present and the status code is 200 OK
+			// Include pagination only if present
 			if paginationExists {
 				response.Pagination = pagination
 			}
