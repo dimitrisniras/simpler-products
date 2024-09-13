@@ -48,7 +48,7 @@ func TestValidateProductID(t *testing.T) {
 
 		// Assertions
 		assert.Error(t, err)
-		assert.Equal(t, "product id is required", err.Error())
+		assert.Equal(t, "invalid product id", err.Error())
 		assert.Equal(t, http.StatusBadRequest, c.Writer.Status())
 	})
 }

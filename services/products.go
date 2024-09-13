@@ -2,15 +2,11 @@ package services
 
 import (
 	"database/sql"
-	"errors"
+	custom_errors "simpler-products/errors"
 	"simpler-products/models"
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-)
-
-var (
-	ErrProductNotFound = errors.New("product not found")
 )
 
 type ProductsServiceInterface interface {
@@ -45,7 +41,7 @@ func (ps *ProductsService) GetAllProducts(limit, offset int) ([]models.Product, 
 	}
 	defer rows.Close()
 
-	var products []models.Product
+	products := make([]models.Product, 0)
 	for rows.Next() {
 		var product models.Product
 		if err := rows.Scan(&product.ID, &product.Name, &product.Description, &product.Price); err != nil {
@@ -65,7 +61,7 @@ func (ps *ProductsService) GetProductById(id string) (*models.Product, error) {
 	err := ps.DB.QueryRow("SELECT * FROM Products WHERE id = ?", id).Scan(&product.ID, &product.Name, &product.Description, &product.Price)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrProductNotFound
+			return nil, custom_errors.ErrProductNotFound
 		}
 		ps.Log.Errorf("Error fetching product: %v", err)
 		return nil, err
@@ -102,7 +98,7 @@ func (ps *ProductsService) UpdateProduct(id string, product *models.Product) (*m
 	updatedProduct, err := ps.GetProductById(id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrProductNotFound
+			return nil, custom_errors.ErrProductNotFound
 		}
 		ps.Log.Errorf("Error updating product: %v", err)
 		return nil, err
@@ -118,7 +114,7 @@ func (ps *ProductsService) DeleteProduct(id string) error {
 	_, err := ps.GetProductById(id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return ErrProductNotFound
+			return custom_errors.ErrProductNotFound
 		}
 		ps.Log.Errorf("Error deleting product: %v", err)
 		return err

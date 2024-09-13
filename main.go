@@ -23,7 +23,7 @@ func main() {
 	defer cfg.DB.Close()
 	defer log.Debug("Closing Database connection")
 
-	router := routers.NewRouter(log, cfg.ProductsService)
+	router := routers.NewRouter(cfg.Services, log)
 
 	log.Printf("Server listening on :%s", cfg.Port)
 	log.Fatal(router.Run(":" + cfg.Port))

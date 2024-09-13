@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
+	custom_errors "simpler-products/errors"
 	"simpler-products/models"
 	"simpler-products/services"
 )
@@ -317,7 +318,7 @@ func TestGetProductByIdService(t *testing.T) {
 
 		// Assertions
 		assert.Error(t, err)
-		assert.True(t, errors.Is(err, services.ErrProductNotFound))
+		assert.True(t, errors.Is(err, custom_errors.ErrProductNotFound))
 		assert.Nil(t, product)
 
 		// Ensure all expectations were met
@@ -704,7 +705,7 @@ func TestUpdateProductService(t *testing.T) {
 
 		// Assertions
 		assert.Error(t, err)
-		assert.True(t, errors.Is(err, services.ErrProductNotFound))
+		assert.True(t, errors.Is(err, custom_errors.ErrProductNotFound))
 		assert.Nil(t, product)
 
 		// Ensure all expectations were met
@@ -843,7 +844,7 @@ func TestDeleteProductService(t *testing.T) {
 
 		// Assertions
 		assert.Error(t, err)
-		assert.True(t, errors.Is(err, services.ErrProductNotFound))
+		assert.True(t, errors.Is(err, custom_errors.ErrProductNotFound))
 
 		// Ensure all expectations were met (no DELETE should be executed)
 		if err := dbMock.ExpectationsWereMet(); err != nil {
