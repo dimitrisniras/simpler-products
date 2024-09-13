@@ -15,7 +15,7 @@ import (
 	"simpler-products/services"
 )
 
-func TestGetAllProducts(t *testing.T) {
+func TestGetAllProductsService(t *testing.T) {
 	// Set up mock database
 	db, dbMock, err := sqlmock.New()
 	if err != nil {
@@ -267,7 +267,7 @@ func TestGetAllProducts(t *testing.T) {
 	})
 }
 
-func TestGetProductById(t *testing.T) {
+func TestGetProductByIdService(t *testing.T) {
 	// Set up mock database
 	db, dbMock, err := sqlmock.New()
 	if err != nil {
@@ -404,7 +404,7 @@ func TestGetProductById(t *testing.T) {
 	})
 }
 
-func TestAddProduct(t *testing.T) {
+func TestAddProductService(t *testing.T) {
 	// Set up mock database
 	db, dbMock, err := sqlmock.New()
 	if err != nil {
@@ -632,7 +632,7 @@ func TestAddProduct(t *testing.T) {
 	})
 }
 
-func TestUpdateProduct(t *testing.T) {
+func TestUpdateProductService(t *testing.T) {
 	// Set up mock database
 	db, dbMock, err := sqlmock.New()
 	if err != nil {
@@ -791,7 +791,7 @@ func TestUpdateProduct(t *testing.T) {
 	})
 }
 
-func TestDeleteProduct(t *testing.T) {
+func TestDeleteProductService(t *testing.T) {
 	// Set up mock database
 	db, dbMock, err := sqlmock.New()
 	if err != nil {

@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"net/http"
+	"simpler-products/models"
 	"simpler-products/services"
 	"simpler-products/validators"
 	"strconv"
@@ -42,6 +43,7 @@ func GetAllProducts(ps services.ProductsServiceInterface) gin.HandlerFunc {
 			"limit":  limit,
 			"offset": offset,
 			"total":  total,
+			"count":  len(products),
 		})
 	}
 }
@@ -50,7 +52,6 @@ func GetProductById(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := validators.ValidateProductID(c)
 		if err != nil {
-			c.Set("errors", err)
 			return
 		}
 
@@ -64,7 +65,7 @@ func GetProductById(ps services.ProductsServiceInterface) gin.HandlerFunc {
 		}
 
 		// Set data in the context
-		c.Set("data", product)
+		c.Set("data", [1]*models.Product{product})
 	}
 }
 
@@ -72,7 +73,6 @@ func AddProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		product, err := validators.ValidateProduct(c)
 		if err != nil {
-			c.Set("errors", err)
 			return
 		}
 
@@ -83,7 +83,7 @@ func AddProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 
 		// Set data in the context
 		c.Status(http.StatusCreated)
-		c.Set("data", product)
+		c.Set("data", [1]*models.Product{product})
 	}
 }
 
@@ -91,13 +91,11 @@ func UpdateProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := validators.ValidateProductID(c)
 		if err != nil {
-			c.Set("errors", err)
 			return
 		}
 
 		product, err := validators.ValidateProduct(c)
 		if err != nil {
-			c.Set("errors", err)
 			return
 		}
 
@@ -111,7 +109,7 @@ func UpdateProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 		}
 
 		// Set data in the context
-		c.Set("data", updatedProduct)
+		c.Set("data", [1]*models.Product{updatedProduct})
 	}
 }
 
@@ -119,7 +117,6 @@ func DeleteProduct(ps services.ProductsServiceInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := validators.ValidateProductID(c)
 		if err != nil {
-			c.Set("errors", err)
 			return
 		}
 
