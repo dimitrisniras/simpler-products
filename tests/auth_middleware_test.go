@@ -7,7 +7,6 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -18,6 +17,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/assert"
 
+	custom_errors "simpler-products/errors"
 	"simpler-products/middlewares"
 )
 
@@ -109,7 +109,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 
 		// Assertions
 		assert.Equal(t, http.StatusUnauthorized, c.Writer.Status())
-		assert.Equal(t, errors.New("invalid token"), err_)
+		assert.Equal(t, custom_errors.ErrInvalidToken, err_)
 	})
 
 	t.Run("MissingAuthorizationHeader", func(t *testing.T) {
@@ -133,7 +133,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 
 		// Assertions
 		assert.Equal(t, http.StatusUnauthorized, c.Writer.Status())
-		assert.Equal(t, errors.New("authorization header missing"), err_)
+		assert.Equal(t, custom_errors.ErrAuthorizationHeaderMissing, err_)
 	})
 
 	t.Run("InvalidAuthorizationHeaderFormat", func(t *testing.T) {
@@ -158,7 +158,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 
 		// Assertions
 		assert.Equal(t, http.StatusUnauthorized, c.Writer.Status())
-		assert.Equal(t, errors.New("invalid Authorization header format"), err_)
+		assert.Equal(t, custom_errors.ErrAuthorizationHeaderFormat, err_)
 	})
 
 	t.Run("AuthDisabled", func(t *testing.T) {
@@ -211,6 +211,6 @@ func TestJWTAuthMiddleware(t *testing.T) {
 
 		// Assertions
 		assert.Equal(t, http.StatusUnauthorized, c.Writer.Status())
-		assert.Equal(t, errors.New("error decoding public key"), err_)
+		assert.Equal(t, custom_errors.ErrDecodingPublicKey, err_)
 	})
 }

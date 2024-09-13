@@ -16,6 +16,7 @@ func NewRouter(servs config.ServiceContainer, log *logrus.Logger) *gin.Engine {
 	// add middlewares
 	router.Use(gin.Recovery())
 	router.Use(middlewares.SecurityHeaders())
+	router.Use(middlewares.CORSMiddleware())
 	router.Use(middlewares.ResponseFormatter(log))
 	router.Use(middlewares.JSONLoggerMiddleware())
 
@@ -36,6 +37,7 @@ func NewRouter(servs config.ServiceContainer, log *logrus.Logger) *gin.Engine {
 
 	{
 		products := api.Group("/products")
+
 		// use auth middleware
 		products.Use(middlewares.JWTAuthMiddleware())
 
