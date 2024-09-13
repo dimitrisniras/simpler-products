@@ -1,0 +1,27 @@
+services:
+  simpler-products-app:
+    build: . 
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+
+  mysql-db:
+    image: mysql:latest
+    container_name: mysql_db
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=your_db_name
+      - MYSQL_USER=your_db_user
+      - MYSQL_ROOT_PASSWORD=your_db_password
+    volumes:
+      - ./mysql-data:/var/lib/mysql
