@@ -5,16 +5,16 @@ This is a Go-based RESTful API for managing products in a store. It provides end
 ## Features
 
 * **Product CRUD operations:**
-  * `GET /api/products`: Retrieve a list of products with pagination support.
-  * `GET /api/products/:id`: Retrieve a specific product by its ID.
-  * `POST /api/products`: Create a new product.
-  * `PUT /api/products/:id`: Update an existing product.
-  * `DELETE /api/products/:id`: Delete a product.
+  * `GET /api/v1/products`: Retrieve a list of products with pagination support.
+  * `GET /api/v1/products/:id`: Retrieve a specific product by its ID.
+  * `POST /api/v1/products`: Create a new product.
+  * `PUT /api/v1/products/:id`: Update an existing product.
+  * `DELETE /api/v1/products/:id`: Delete a product.
 * **Authentication:**
   * `JWT_SECRET_KEY` and `AUTH_ENABLED` environment variables control JWT authentication.
   * Product endpoints require a valid JWT token in the `Authorization` header when authentication is enabled.
 * **Pagination:**
-  * The `GET /api/products` endpoint supports pagination using `limit` and `offset` query parameters.
+  * The `GET /api/v1/products` endpoint supports pagination using `limit` and `offset` query parameters.
 * **Response handling:**
   * Centralized response and error handling middleware provides consistent and structured responses.
 * **Logging:**
@@ -179,7 +179,7 @@ openssl rsa -in private.pem -pubout -out public.pem
     }
     ```
 
-* **`GET /api/products`**
+* **`GET /api/v1/products`**
 
   * Retrieves a list of products.
   * Supports pagination using limit and offset query parameters.
@@ -220,7 +220,7 @@ openssl rsa -in private.pem -pubout -out public.pem
     }
     ```
 
-* **`GET /api/products/:id`**
+* **`GET /api/v1/products/:id`**
 
   * Retrieves a specific product by its ID.
   * Requires authentication.
@@ -252,7 +252,7 @@ openssl rsa -in private.pem -pubout -out public.pem
     }
     ```
 
-* **`POST /api/products`**
+* **`POST /api/v1/products`**
 
   * Creates a new product.
   * Requires authentication.
@@ -287,7 +287,7 @@ openssl rsa -in private.pem -pubout -out public.pem
     }
     ```
 
-* **`PUT /api/products/:id`**
+* **`PUT /api/v1/products/:id`**
 
   * Updates an existing product.
   * Requires authentication.
@@ -319,7 +319,7 @@ openssl rsa -in private.pem -pubout -out public.pem
     }
     ```
 
-* **`DELETE /api/products/:id`**
+* **`DELETE /api/v1/products/:id`**
 
   * Deletes a product.
   * Requires authentication.
@@ -351,14 +351,14 @@ openssl rsa -in private.pem -pubout -out public.pem
 curl -X POST -H "Content-Type: application/json" \
 -H "Authorization: Bearer your_jwt_token" \
 -d '{"name": "New Product", "description": "This is a new product", "price": 19.99}' \
-http://localhost:8080/api/products
+http://localhost:8080/api/v1/products
 ```
 
 ### Retrieving Products
 
 ```bash
 curl -H "Authorization: Bearer your_jwt_token" \
-http://localhost:8080/api/products?limit=5&offset=0
+http://localhost:8080/api/v1/products?limit=5&offset=0
 ```
 
 Remember to replace `your_jwt_token` with an actual valid JWT token if authentication is enabled.
