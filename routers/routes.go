@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"os"
 	"simpler-products/config"
 	"simpler-products/controllers"
 	v1Controllers "simpler-products/controllers/v1"
@@ -33,25 +34,28 @@ func NewRouter(servs config.ServiceContainer, log *logrus.Logger) *gin.Engine {
 	{
 		// v1 routes
 		v1Routes := api.Group("/v1")
+
+		// /products routes
 		{
-			// /products routes
 			productsService, ok := servs.(services.ProductsServiceInterface)
 			if !ok {
 				log.Fatal("ProductsServiceInterface not found in services")
 			}
 
-			{
-				products := v1Routes.Group("/products")
+			products := v1Routes.Group("/products")
 
+			authEnabled := os.Getenv("AUTH_ENABLED")
+			if authEnabled == "true" {
 				// use auth middleware
 				products.Use(middlewares.JWTAuthMiddleware())
-
-				products.GET("", v1Controllers.GetAllProducts(productsService))
-				products.GET("/:id", v1Controllers.GetProductById(productsService))
-				products.POST("", v1Controllers.AddProduct(productsService))
-				products.PUT("/:id", v1Controllers.UpdateProduct(productsService))
-				products.DELETE("/:id", v1Controllers.DeleteProduct(productsService))
 			}
+
+			products.GET("", v1Controllers.GetAllProducts(productsService))
+			products.GET("/:id", v1Controllers.GetProductById(productsService))
+			products.POST("", v1Controllers.AddProduct(productsService))
+			products.PUT("/:id", v1Controllers.UpdateProduct(productsService))
+			products.DELETE("/:id", v1Controllers.DeleteProduct(productsService))
+
 		}
 	}
 
