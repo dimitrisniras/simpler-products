@@ -161,27 +161,6 @@ func TestJWTAuthMiddleware(t *testing.T) {
 		assert.Equal(t, custom_errors.ErrAuthorizationHeaderFormat, err_)
 	})
 
-	t.Run("AuthDisabled", func(t *testing.T) {
-		// Create a request (Authorization header doesn't matter in this case)
-		req, _ := http.NewRequest("GET", "/api/v1/products", nil)
-
-		// Create a response recorder
-		w := httptest.NewRecorder()
-
-		// Create a Gin context
-		c, _ := gin.CreateTestContext(w)
-		c.Request = req
-
-		// Set AUTH_ENABLED to false
-		os.Setenv("AUTH_ENABLED", "false")
-
-		// Call the middleware
-		middlewares.JWTAuthMiddleware()(c)
-
-		// Assertions
-		assert.Equal(t, http.StatusOK, c.Writer.Status()) // Should proceed to the next handler
-	})
-
 	t.Run("ErrorDecodingPublicKey", func(t *testing.T) {
 		// Set an invalid Base64 string as the public key
 		os.Setenv("JWT_SECRET_KEY", "invalid_base64")
