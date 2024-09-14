@@ -32,7 +32,7 @@ func Init(log *logrus.Logger, user, password, host, port, dbName string) (*sql.D
 
 func checkDBConnection(db *sql.DB, dbConnectionString string, log *logrus.Logger) {
 	for {
-		// Sleep for a specified interval (e.g., every 5 seconds)
+		// Sleep for 5s
 		time.Sleep(5 * time.Second)
 
 		// Check the connection
@@ -47,7 +47,7 @@ func checkDBConnection(db *sql.DB, dbConnectionString string, log *logrus.Logger
 				db, err = sql.Open("mysql", dbConnectionString)
 				if err != nil {
 					log.Errorf("Reconnection failed: %v", err)
-					time.Sleep(5 * time.Second) // Wait before retrying
+					time.Sleep(5 * time.Second)
 					continue
 				}
 

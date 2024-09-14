@@ -8,6 +8,7 @@ import (
 	"simpler-products/middlewares"
 	"simpler-products/services"
 
+	"github.com/dvwright/xss-mw"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -17,6 +18,11 @@ func NewRouter(servs config.ServiceContainer, log *logrus.Logger) *gin.Engine {
 
 	// add middlewares
 	router.Use(gin.Recovery())
+
+	// sanitize input for XSS protection
+	var xssMdlwr xss.XssMw
+	router.Use(xssMdlwr.RemoveXss())
+
 	router.Use(middlewares.SecurityHeaders())
 	router.Use(middlewares.CORSMiddleware())
 	router.Use(middlewares.ResponseFormatter(log))
