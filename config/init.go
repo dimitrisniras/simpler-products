@@ -7,7 +7,7 @@ import (
 	"simpler-products/database"
 	"simpler-products/services"
 
-	_ "github.com/go-sql-driver/mysql" // MySQL driver
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
@@ -41,25 +41,26 @@ func Init(log *logrus.Logger) (*Config, error) {
 	dbName := os.Getenv("DB_NAME")
 
 	// Set Gin mode and stdout logs based on log level
-	if logLevel == "trace" {
+	switch logLevel {
+	case "trace":
 		gin.SetMode(gin.TestMode)
 		log.SetLevel(logrus.TraceLevel)
-	} else if logLevel == "debug" {
+	case "debug":
 		gin.SetMode(gin.DebugMode)
 		log.SetLevel(logrus.DebugLevel)
-	} else if logLevel == "info" {
+	case "info":
 		gin.SetMode(gin.ReleaseMode)
 		log.SetLevel(logrus.InfoLevel)
-	} else if logLevel == "warn" {
+	case "warn":
 		gin.SetMode(gin.ReleaseMode)
 		log.SetLevel(logrus.WarnLevel)
-	} else if logLevel == "error" {
+	case "error":
 		gin.SetMode(gin.ReleaseMode)
 		log.SetLevel(logrus.ErrorLevel)
-	} else if logLevel == "release" {
+	case "release":
 		gin.SetMode(gin.ReleaseMode)
 		log.SetLevel(logrus.InfoLevel)
-	} else {
+	default:
 		gin.SetMode(gin.ReleaseMode)
 		log.SetLevel(logrus.InfoLevel)
 	}

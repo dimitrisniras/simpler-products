@@ -23,6 +23,7 @@ install-deps:
 	go get github.com/dgrijalva/jwt-go
 	go get github.com/DATA-DOG/go-sqlmock
 	go get github.com/stretchr/testify/assert
+	go get github.com/dvwright/xss-mw
 
 build:
 	go build -o bin/main main.go
