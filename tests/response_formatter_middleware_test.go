@@ -6,14 +6,13 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"simpler-products/middlewares"
+	"simpler-products/validators"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-
-	"simpler-products/middlewares"
-	"simpler-products/validators"
 )
 
 func TestResponseFormatter(t *testing.T) {

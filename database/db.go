@@ -37,7 +37,6 @@ func checkDBConnection(db *sql.DB, dbConnectionString string, log *logrus.Logger
 
 		// Check the connection
 		err := db.Ping()
-
 		if err != nil {
 			log.Errorf("Database connection lost: %v", err)
 

@@ -55,7 +55,7 @@ func main() {
 
 	// Attempt graceful shutdown
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown: ", err)
+		log.Error("Server forced to shutdown: ", err)
 	}
 
 	log.Println("Server exiting")

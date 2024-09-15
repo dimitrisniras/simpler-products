@@ -44,6 +44,12 @@ clean-deps:
 clean-all: clean clean-deps
 
 # Linting and formatting
+lint: 
+	${GOLANGCI_LINT} run --no-config --disable-all --enable gocritic,gofumpt
+
+lint-fix: 
+	${GOLANGCI_LINT} run --no-config --disable-all --enable gocritic,gofumpt --fix
+
 fmt:
 	go fmt ./...
 
