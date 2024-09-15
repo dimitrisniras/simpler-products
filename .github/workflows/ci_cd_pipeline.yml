@@ -29,8 +29,6 @@ jobs:
     - name: Install dependencies
       run: make install-deps
     - name: Lint
-      run: make lint
-    - name: Lint
       uses: golangci/golangci-lint-action@v3
       with:
         version: v1.53.3
