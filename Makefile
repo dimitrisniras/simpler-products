@@ -24,6 +24,7 @@ install-deps:
 	go get github.com/DATA-DOG/go-sqlmock
 	go get github.com/stretchr/testify/assert
 	go get github.com/dvwright/xss-mw
+	go get github.com/golangci/golangci-lint
 
 build:
 	go build -o bin/main main.go
