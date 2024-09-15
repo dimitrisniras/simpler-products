@@ -6,13 +6,12 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"simpler-products/models"
+	"simpler-products/validators"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-
-	"simpler-products/models"
-	"simpler-products/validators"
 )
 
 func TestValidateProductID(t *testing.T) {

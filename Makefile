@@ -24,6 +24,7 @@ install-deps:
 	go get github.com/DATA-DOG/go-sqlmock
 	go get github.com/stretchr/testify/assert
 	go get github.com/dvwright/xss-mw
+	go get github.com/golangci/golangci-lint
 
 build:
 	go build -o bin/main main.go
@@ -44,6 +45,12 @@ clean-deps:
 clean-all: clean clean-deps
 
 # Linting and formatting
+lint: 
+	${GOLANGCI_LINT} run --no-config --disable-all --enable gocritic,gofumpt
+
+lint-fix: 
+	${GOLANGCI_LINT} run --no-config --disable-all --enable gocritic,gofumpt --fix
+
 fmt:
 	go fmt ./...
 

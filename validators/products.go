@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"simpler-products/models"
 	"strconv"
 	"strings"
 
 	custom_errors "simpler-products/errors"
-	"simpler-products/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -101,6 +101,5 @@ func init() {
 			return ""
 		}
 		return name
-
 	})
 }

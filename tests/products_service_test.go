@@ -3,6 +3,8 @@ package tests
 import (
 	"database/sql"
 	"errors"
+	"simpler-products/models"
+	"simpler-products/services"
 	"strings"
 	"testing"
 
@@ -12,8 +14,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	custom_errors "simpler-products/errors"
-	"simpler-products/models"
-	"simpler-products/services"
 )
 
 func TestGetAllProductsService(t *testing.T) {

@@ -3,7 +3,6 @@ package config
 import (
 	"database/sql"
 	"os"
-
 	"simpler-products/database"
 	"simpler-products/services"
 

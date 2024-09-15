@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"simpler-products/middlewares"
 	"testing"
 	"time"
 
@@ -18,7 +19,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	custom_errors "simpler-products/errors"
-	"simpler-products/middlewares"
 )
 
 func TestJWTAuthMiddleware(t *testing.T) {

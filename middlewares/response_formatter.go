@@ -36,9 +36,8 @@ func ResponseFormatter(log *logrus.Logger) gin.HandlerFunc {
 
 			// Format the errors consistently
 			formattedErrors := make([]map[string]any, 0)
-			switch errors.(type) {
+			switch err := errors.(type) {
 			case *validators.ValidationError:
-				err := errors.(*validators.ValidationError)
 				for _, validationError := range err.Errors {
 					for _, errorMsg := range validationError {
 						formattedErrors = append(formattedErrors, map[string]any{
@@ -47,7 +46,7 @@ func ResponseFormatter(log *logrus.Logger) gin.HandlerFunc {
 					}
 				}
 			case []string:
-				for _, errorMsg := range errors.([]string) {
+				for _, errorMsg := range err {
 					formattedErrors = append(formattedErrors, map[string]any{
 						"message": errorMsg,
 					})
